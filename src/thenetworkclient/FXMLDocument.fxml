@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" disable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="332.0" prefWidth="640.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2">
+  <children>
+    <HBox id="HBox" alignment="CENTER" spacing="5.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+      <children>
+        <TextField prefWidth="200.0" promptText="UserID or E-Mail" />
+        <PasswordField prefWidth="200.0" promptText="Password" text="" />
+        <Button mnemonicParsing="false" text="Button" />
+      </children>
+    </HBox>
+    <Label text="The Network" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="17.0" />
+    <ScrollPane fitToHeight="false" fitToWidth="true" prefHeight="288.0" prefWidth="640.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="44.0">
+      <content>
+        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="327.0" prefWidth="625.0">
+          <children>
+            <ListView prefHeight="327.0" prefWidth="624.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+          </children>
+        </AnchorPane>
+      </content>
+    </ScrollPane>
+  </children>
+</AnchorPane>

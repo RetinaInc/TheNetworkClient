@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
+<?import java.net.*?>
 <?import java.util.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<AnchorPane id="AnchorPane" disable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="332.0" prefWidth="640.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2">
+<AnchorPane fx:id="background" disable="false" maxHeight="332.0" maxWidth="-Infinity" minHeight="332.0" minWidth="600.0" onKeyReleased="#pressEscape" onMouseDragged="#backgroundMouseDragged" onMousePressed="#backgroundMousePressed" prefHeight="332.0" prefWidth="640.0" visible="true" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="thenetworkclient.FXMLDocumentController">
   <children>
-    <HBox id="HBox" alignment="CENTER" spacing="5.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+    <Label fx:id="label_top" text="The Network" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="16.0" />
+    <AnchorPane id="Content" fx:id="listViewAnchor" layoutX="1.0" layoutY="45.0" minHeight="0.0" minWidth="0.0" prefHeight="287.0" prefWidth="638.0">
       <children>
-        <TextField prefWidth="200.0" promptText="UserID or E-Mail" />
-        <PasswordField prefWidth="200.0" promptText="Password" text="" />
-        <Button mnemonicParsing="false" text="Button" />
+        <ListView fx:id="list" minHeight="0.0" minWidth="0.0" opacity="1.0" prefHeight="287.0" prefWidth="640.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="0.0" />
+      </children>
+    </AnchorPane>
+    <Label fx:id="message" layoutX="159.0" layoutY="18.0" opacity="0.0" prefWidth="466.0" text="Label" />
+    <HBox id="HBox" fx:id="logoutBox" alignment="CENTER" layoutX="216.0" layoutY="14.0" opacity="0.0" spacing="5.0">
+      <children>
+        <Button fx:id="loadOlderPostsButton" mnemonicParsing="false" onAction="#loadOlderPostsButton" text="Get older posts" />
+        <Button id="loadPostsButton" fx:id="loadNewerPostsButton" mnemonicParsing="false" onAction="#loadNewerPostsButton" text="Check for newer posts" />
+        <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#performLogout" text="Logout" />
+        <Button fx:id="exitButton" mnemonicParsing="false" onAction="#pressExitButton" text="Exit" />
       </children>
     </HBox>
-    <Label text="The Network" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="17.0" />
-    <ScrollPane fitToHeight="false" fitToWidth="true" prefHeight="288.0" prefWidth="640.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="44.0">
-      <content>
-        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="327.0" prefWidth="625.0">
-          <children>
-            <ListView prefHeight="327.0" prefWidth="624.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-          </children>
-        </AnchorPane>
-      </content>
-    </ScrollPane>
+    <HBox id="HBox" fx:id="loginBox" alignment="CENTER" opacity="1.0" spacing="5.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="13.0">
+      <children>
+        <TextField id="label" fx:id="email" onAction="#handleLoginAction" prefWidth="200.0" promptText="UserID or E-Mail" />
+        <PasswordField fx:id="password" onAction="#handleLoginAction" prefWidth="200.0" promptText="Password" text="" />
+        <Button mnemonicParsing="false" onAction="#handleLoginAction" text="Login" />
+      </children>
+    </HBox>
   </children>
+  <stylesheets>
+    <URL value="@FXMLStylesheet.css" />
+  </stylesheets>
 </AnchorPane>

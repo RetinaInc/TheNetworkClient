@@ -475,7 +475,10 @@ public class FXMLDocumentController {
 
             @Override
             public void handle(ActionEvent event) {
-                loadNewerPostsButton(event);
+                if(loggedIn)
+                {
+                    loadNewerPostsButton(event);
+                }
             }
         }));
         backgroundCheckNewPosts.setCycleCount(Timeline.INDEFINITE);

@@ -19,7 +19,6 @@ package thenetworkclient;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * This class represents a post.

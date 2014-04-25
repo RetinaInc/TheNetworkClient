@@ -1,15 +1,28 @@
+/*
+ * Copyright (C) 2014 Frank Steiler <frank@steiler.eu>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package thenetworkclient;
 
-
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Timestamp;
-import java.util.ResourceBundle;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -18,7 +31,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
@@ -40,12 +52,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 
 public class FXMLDocumentController {
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
 
     @FXML
     private AnchorPane background;
@@ -74,15 +80,16 @@ public class FXMLDocumentController {
     @FXML
     private HBox logoutBox;
     
-    @FXML
-    private Button loadNewerPostsButton;    
-    
-    @FXML
-    private Button loadOlderPostsButton;  
-    
+    /**
+     * Items presented in the application.
+     */
     private static ObservableList items = FXCollections.observableArrayList();
     
-    private static final int ROW_HEIGHT = 24;
+    /**
+     * The URL of the server.
+     */
+    private URL url;
+    private String url_string = "http://localhost:8080/";
     
     /**
      * Handling of fade ins & outs of top bar.
@@ -95,7 +102,7 @@ public class FXMLDocumentController {
     private FadeTransition messageFadeOut;
     
     /**
-     * Used to check if the transitions are allready finished.
+     * Used to check if any transitions is allready finished.
      */
     private boolean ready = false;
 
@@ -114,21 +121,64 @@ public class FXMLDocumentController {
     boolean loggedIn = false;
     
     /**
-     * Stores the oldest and the newest post.
+     * Stores the timestamp of the oldest and the newest post.
      */
     long newestPost = 0;
     long oldestPost = 0;
-
+    
+    
+    /**
+     * Initialization of the javaFX application.
+     */
     @FXML
-    void performLogout(ActionEvent event) {
-        items.clear();
-        user = null;
-        userPassword = null;
-        fadeOutLogoutBox.play();
-        ready = false;
-        loggedIn = false;
+    void initialize() {
+        assert background != null : "fx:id=\"background\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
+        assert email != null : "fx:id=\"email\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
+        assert label_top != null : "fx:id=\"label_top\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
+        assert list != null : "fx:id=\"list\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
+        assert listViewAnchor != null : "fx:id=\"listViewAnchor\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
+        assert password != null : "fx:id=\"password\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
+        assert message != null : "fx:id=\"message\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
+        assert loginBox != null : "fx:id=\"loginBox\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
+       
+        try 
+        {
+            url = new URL(url_string);
+        } 
+        catch (MalformedURLException e) 
+        {
+            System.err.println("Bad URL");
+        }
+        
+        initBackgroundTask();
+        
+        initFading();
+        
+        list.setItems(items);
     }
     
+    /**
+     * This function initializes the background task of checking if there are any new posts.
+     */
+    void initBackgroundTask()
+    {
+        Timeline backgroundCheckNewPosts = new Timeline(new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                if(loggedIn)
+                {
+                    loadNewerPostsButton(event);
+                }
+            }
+        }));
+        backgroundCheckNewPosts.setCycleCount(Timeline.INDEFINITE);
+        backgroundCheckNewPosts.play();
+    }
+    
+    /**
+     * This function initiates the fading actions and handlers.
+     */
     public void initFading()
     {
         double duration = 1000;
@@ -237,8 +287,106 @@ public class FXMLDocumentController {
     }
     
     /**
-     * This function executes the movement of the window. Somehow window jumped if both values are even.
+     * This function handles the press of the login button. If the provided credentials are correct the function displays the latest posts.
      * @param event 
+     */
+    @FXML
+    void handleLoginAction(ActionEvent event) 
+    {
+        fadeOutLoginBox.play();
+        user = email.getText();
+        userPassword = password.getText();
+        password.setText("");
+        
+        String[] args = {"userLogin=" + user, "&passwordLogin=" + userPassword};
+        servletConnection(args);
+    }
+    
+    /**
+     * This function loads all newer posts.
+     * @param event 
+     */
+    @FXML
+    void loadNewerPostsButton(ActionEvent event) 
+    {
+        String[] args = {"userLogin=" + user, "&passwordLogin=" + userPassword, "&newer=" + newestPost};
+        servletConnection(args);
+    }
+    
+    /**
+     * This function loads a given amount of older posts. 
+     * @param event 
+     */
+    @FXML
+    void loadOlderPostsButton(ActionEvent event) 
+    {
+        String[] args = {"userLogin=" + user, "&passwordLogin=" + userPassword, "&older=" + oldestPost, "&amount=" + 10};
+        servletConnection(args);
+    }
+    
+    /**
+     * Connects to the servlet and doing a post action using the arguments
+     * @param args Array of arguments.
+     * @return True if successful, false otherwise.
+     */
+    boolean servletConnection(String[] args)
+    {
+        boolean success = true;
+        
+        try 
+        {
+            //prepare the XML parser
+            SAXParser parser = prepareXMLparser();
+
+            // open a connection of post requests
+            URLConnection con = url.openConnection();
+            con.setDoInput(true);
+            con.setDoOutput(true);
+            con.setUseCaches(false);
+
+            //let the controller know what type of client is connecting
+            con.setRequestProperty("user-agent", "xml-app_TheNetwork");
+            try (DataOutputStream out = new DataOutputStream(con.getOutputStream())) 
+            {
+                for(String str : args)
+                {
+                    out.writeBytes(str);
+                }
+                out.flush();
+            }
+
+            //get ready to read the servlet's response
+            InputStream in = con.getInputStream();
+            
+            //parse the servlet's XML response
+            parser.parse(in, new XMLParser());
+
+            in.close();
+        } 
+        catch (Exception e) 
+        {
+            success = false;
+        }
+        return success;
+    }
+    
+    /**
+     * This function performas the logout of the user.
+     * @param event 
+     */
+    @FXML
+    void performLogout(ActionEvent event) {
+        items.clear();
+        user = null;
+        userPassword = null;
+        fadeOutLogoutBox.play();
+        ready = false;
+        loggedIn = false;
+    }
+    
+    /**
+     * This function executes the movement of the window. Somehow window jumped if both values are even.
+     * @param event The mouse event while dragging.
      */
     @FXML
     public void backgroundMouseDragged(MouseEvent event)
@@ -254,7 +402,7 @@ public class FXMLDocumentController {
 
     /**
      * Saves the offset of the mouse and gets the window if it is the first time the window gets moved.
-     * @param event 
+     * @param event The mouse event while pressing.
      */
     @FXML
     void backgroundMousePressed(MouseEvent event) 
@@ -269,9 +417,8 @@ public class FXMLDocumentController {
     
     
     /**
-     * These functions handle the exit of the application.
+     * This function handles the press a button. If this button is the escape button the application exits.
      */
-    
     @FXML
     void pressEscape(KeyEvent event) 
     {
@@ -281,12 +428,19 @@ public class FXMLDocumentController {
         }
     }
     
+    /**
+     * This functions handles the press of the exit button. If the button is pressed the application exits.
+     * @param event 
+     */
     @FXML
     void pressExitButton(ActionEvent event) 
     {
         performExit();
     }
     
+    /**
+     * This function perfoms the exit of the program.
+     */
     void performExit()
     {
         FadeTransition exit = new FadeTransition(new Duration(1500));
@@ -304,188 +458,18 @@ public class FXMLDocumentController {
         });
     }
     
-    @FXML
-    void handleLoginAction(ActionEvent event) 
-    {
-        fadeOutLoginBox.play();
-        try
-        {
-            //prepare the XML parser
-            SAXParser parser = prepareXMLparser();
-
-            //the controller servlet's URL
-            URL url = new URL("http://localhost:8080/");
-
-            // open a connection of post requests
-            URLConnection con = url.openConnection();
-            con.setDoInput(true);
-            con.setDoOutput(true);
-            con.setUseCaches(false);
-
-            //let the controller know what type of client is connecting
-            con.setRequestProperty("user-agent", "xml-app_TheNetwork");
-
-            //send the request parameters as post data
-            DataOutputStream out = new DataOutputStream(con.getOutputStream());
-            user = email.getText();
-            userPassword = password.getText();
-            password.setText("");
-            out.writeBytes("userLogin=" + user);
-            out.writeBytes("&passwordLogin=" + userPassword);
-            out.flush();
-            out.close();
-
-            //get ready to read the servlet's response
-            InputStream in = con.getInputStream();
-            
-            //String result = getStringFromInputStream(in);
- 
-            //System.out.println(result);
-            //parse the servlet's XML response
-            parser.parse(in, new XMLParser());
-
-            in.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
-    @FXML
-    void loadNewerPostsButton(ActionEvent event) 
-    {
-        try
-        {
-            //prepare the XML parser
-            SAXParser parser = prepareXMLparser();
-
-            //the controller servlet's URL
-            URL url = new URL("http://localhost:8080/");
-
-            // open a connection of post requests
-            URLConnection con = url.openConnection();
-            con.setDoInput(true);
-            con.setDoOutput(true);
-            con.setUseCaches(false);
-
-            //let the controller know what type of client is connecting
-            con.setRequestProperty("user-agent", "xml-app_TheNetwork");
-
-            //send the request parameters as post data
-            DataOutputStream out = new DataOutputStream(con.getOutputStream());
-            out.writeBytes("userLogin=" + user);
-            out.writeBytes("&passwordLogin=" + userPassword);
-            out.writeBytes("&newer=" + newestPost);
-            out.flush();
-            out.close();
-
-            //get ready to read the servlet's response
-            InputStream in = con.getInputStream();
-            
-            //String result = getStringFromInputStream(in);
- 
-            //System.out.println(result);
-            //parse the servlet's XML response
-            parser.parse(in, new XMLParser());
-
-            in.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
-    @FXML
-    void loadOlderPostsButton(ActionEvent event) 
-    {
-        try
-        {
-            //prepare the XML parser
-            SAXParser parser = prepareXMLparser();
-
-            //the controller servlet's URL
-            URL url = new URL("http://localhost:8080/");
-
-            // open a connection of post requests
-            URLConnection con = url.openConnection();
-            con.setDoInput(true);
-            con.setDoOutput(true);
-            con.setUseCaches(false);
-
-            //let the controller know what type of client is connecting
-            con.setRequestProperty("user-agent", "xml-app_TheNetwork");
-
-            //send the request parameters as post data
-            DataOutputStream out = new DataOutputStream(con.getOutputStream());
-            out.writeBytes("userLogin=" + user);
-            out.writeBytes("&passwordLogin=" + userPassword);
-            out.writeBytes("&older=" + oldestPost);
-            out.writeBytes("&amount=" + 10);
-            out.flush();
-            out.close();
-
-            //get ready to read the servlet's response
-            InputStream in = con.getInputStream();
-            
-            //String result = getStringFromInputStream(in);
-            //System.out.println(result);
-            
-            //parse the servlet's XML response
-            parser.parse(in, new XMLParser());
-
-            in.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
-    private SAXParser prepareXMLparser()
-            throws ParserConfigurationException, SAXException
+    /**
+     * This function prepares a XML parser.
+     * @return A SAXParser.
+     * @throws ParserConfigurationException
+     * @throws SAXException 
+     */
+    private SAXParser prepareXMLparser() throws ParserConfigurationException, SAXException
     {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setValidating(true);
         return factory.newSAXParser();
     }
-
-    @FXML
-    void initialize() {
-        assert background != null : "fx:id=\"background\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
-        assert email != null : "fx:id=\"email\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
-        assert label_top != null : "fx:id=\"label_top\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
-        assert list != null : "fx:id=\"list\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
-        assert listViewAnchor != null : "fx:id=\"listViewAnchor\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
-        assert password != null : "fx:id=\"password\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
-        assert message != null : "fx:id=\"message\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
-        assert loginBox != null : "fx:id=\"loginBox\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
-       
-        initBackgroundTask();
-        
-        initFading();
-        
-        list.setItems(items);
-    }
-    
-    void initBackgroundTask()
-    {
-        Timeline backgroundCheckNewPosts = new Timeline(new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                if(loggedIn)
-                {
-                    loadNewerPostsButton(event);
-                }
-            }
-        }));
-        backgroundCheckNewPosts.setCycleCount(Timeline.INDEFINITE);
-        backgroundCheckNewPosts.play();
-    }
-
-    
     
     /**
      * That is the XML Parser parcing the response of the server.
@@ -495,21 +479,28 @@ public class FXMLDocumentController {
         private boolean errorMessage = false, postID = false, publisherName = false, content =false, postTimeStamp = false;
         XMLPost currentPost;
         
+        /**
+         * Counter for newer posts.
+         */
         int counterForNewer = 0;
 
-
+        /**
+         * Resets counter at the beginning.
+         */
         @Override
-        public void startDocument() throws SAXException
+        public void startDocument()
         {
             counterForNewer = 0;
         }
 
-        @Override
-        public void endDocument() throws SAXException
-        {
-            
-        }
-
+        /**
+         * This funtion is called at the beginning of an element.
+         * @param uri
+         * @param localName
+         * @param qName
+         * @param attributes
+         * @throws SAXException 
+         */
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
         {
@@ -577,7 +568,6 @@ public class FXMLDocumentController {
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException
         {
-
             String s = (new String(ch, start, length)).trim();
 
             if(errorMessage)
@@ -623,43 +613,5 @@ public class FXMLDocumentController {
                 currentPost.setTimestamp(new Timestamp(post));
             }
         }
-
-        @Override
-        public void error(SAXParseException spe) throws SAXException
-        {
-            //displayTA.append("[XML parse error: " + spe.getMessage() + "]\n");
-        }
-    }
-    
-    private static String getStringFromInputStream(InputStream is) 
-    {
-        BufferedReader br = null;
-        StringBuilder sb = new StringBuilder();
-
-        String line;
-        try {
-
-                br = new BufferedReader(new InputStreamReader(is));
-                while ((line = br.readLine()) != null) {
-                        sb.append(line);
-                }
-
-        } catch (IOException e) {
-                e.printStackTrace();
-        } finally {
-                if (br != null) {
-                        try {
-                                br.close();
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                }
-        }
-
-        return sb.toString();
-
     }
 }
-
-
-

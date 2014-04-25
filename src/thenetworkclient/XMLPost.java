@@ -87,6 +87,11 @@ public class XMLPost
         this.publishingUser = publishingUser;
     }
     
+    /**
+     * This function creates a string based on the information stored in the object, to represent the object within the list.
+     * @return 
+     */
+    @Override
     public String toString()
     {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");

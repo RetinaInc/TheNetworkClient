@@ -28,10 +28,11 @@ import javafx.stage.StageStyle;
  *
  * @author Frank Steiler <frank@steiler.eu>
  */
-public class TheNetworkClient extends Application {
-    
+public class TheNetworkClient extends Application 
+{
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception 
+    {
         Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         
         Scene scene = new Scene(root);
@@ -50,7 +51,8 @@ public class TheNetworkClient extends Application {
      *
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) 
+    {
         launch(args);
     }
     

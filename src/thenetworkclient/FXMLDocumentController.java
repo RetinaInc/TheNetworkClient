@@ -51,8 +51,8 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
-public class FXMLDocumentController {
-
+public class FXMLDocumentController 
+{
     @FXML
     private AnchorPane background;
 
@@ -131,7 +131,8 @@ public class FXMLDocumentController {
      * Initialization of the javaFX application.
      */
     @FXML
-    void initialize() {
+    void initialize() 
+    {
         assert background != null : "fx:id=\"background\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
         assert email != null : "fx:id=\"email\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
         assert label_top != null : "fx:id=\"label_top\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
@@ -375,7 +376,8 @@ public class FXMLDocumentController {
      * @param event 
      */
     @FXML
-    void performLogout(ActionEvent event) {
+    void performLogout(ActionEvent event) 
+    {
         items.clear();
         user = null;
         userPassword = null;

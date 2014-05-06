@@ -25,11 +25,17 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- *
+ * This is the entry class for the "The Network" desktop application.
  * @author Frank Steiler <frank@steiler.eu>
  */
 public class TheNetworkClient extends Application 
 {
+
+    /**
+     * The start method for the JavaFX application.
+     * @param stage The stage of the application.
+     * @throws Exception If an error happens.
+     */
     @Override
     public void start(Stage stage) throws Exception 
     {

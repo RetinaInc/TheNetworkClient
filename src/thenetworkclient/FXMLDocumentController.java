@@ -47,10 +47,12 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-
+/**
+ * This class is the controller for the "The Network" desktop application.
+ * @author steilerf
+ */
 public class FXMLDocumentController 
 {
     @FXML
@@ -89,16 +91,34 @@ public class FXMLDocumentController
      * The URL of the server.
      */
     private URL url;
-    private String url_string = "http://localhost:8080/";
+    /**
+     * The URL of the server.
+     */
+    private final String url_string = "http://localhost:8080/";
     
     /**
      * Handling of fade ins & outs of top bar.
      */
     private FadeTransition fadeOutLoginBox;
+    /**
+     * Handling of fade ins & outs of top bar.
+     */
     private FadeTransition fadeInLoginBox;
+    /**
+     * Handling of fade ins & outs of top bar.
+     */
     private FadeTransition fadeOutLogoutBox;
+    /**
+     * Handling of fade ins & outs of top bar.
+     */
     private FadeTransition fadeInLogoutBox;
+    /**
+     * Handling of fade ins & outs of top bar.
+     */
     private FadeTransition messageFadeIn;
+    /**
+     * Handling of fade ins & outs of top bar.
+     */
     private FadeTransition messageFadeOut;
     
     /**
@@ -110,28 +130,43 @@ public class FXMLDocumentController
      * Variables needed to move the frame.
      */
     private Stage stage;
+    /**
+     * Variables needed to move the frame.
+     */
     private double xOffset;
+    /**
+     * Variables needed to move the frame.
+     */
     private double yOffset;
     
     /**
      * Application needs to save password and user to authenticate for each command.
      */
     private String user;
+    /**
+     * Application needs to save password and user to authenticate for each command.
+     */
     private String userPassword;
-    boolean loggedIn = false;
+    /**
+     * Application needs to save password and user to authenticate for each command.
+     */
+    private boolean loggedIn = false;
     
     /**
      * Stores the timestamp of the oldest and the newest post.
      */
-    long newestPost = 0;
-    long oldestPost = 0;
+    private long newestPost = 0;
+    /**
+     * Stores the timestamp of the oldest and the newest post.
+     */
+    private long oldestPost = 0;
     
     
     /**
      * Initialization of the javaFX application.
      */
     @FXML
-    void initialize() 
+    public void initialize() 
     {
         assert background != null : "fx:id=\"background\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
         assert email != null : "fx:id=\"email\" was not injected: check your FXML file 'FXMLDocument.fxml'.";
@@ -161,7 +196,7 @@ public class FXMLDocumentController
     /**
      * This function initializes the background task of checking if there are any new posts.
      */
-    void initBackgroundTask()
+    public void initBackgroundTask()
     {
         Timeline backgroundCheckNewPosts = new Timeline(new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>() {
 
@@ -292,7 +327,7 @@ public class FXMLDocumentController
      * @param event 
      */
     @FXML
-    void handleLoginAction(ActionEvent event) 
+    public void handleLoginAction(ActionEvent event) 
     {
         fadeOutLoginBox.play();
         user = email.getText();
@@ -308,7 +343,7 @@ public class FXMLDocumentController
      * @param event 
      */
     @FXML
-    void loadNewerPostsButton(ActionEvent event) 
+    public void loadNewerPostsButton(ActionEvent event) 
     {
         String[] args = {"userLogin=" + user, "&passwordLogin=" + userPassword, "&newer=" + newestPost};
         servletConnection(args);
@@ -319,7 +354,7 @@ public class FXMLDocumentController
      * @param event 
      */
     @FXML
-    void loadOlderPostsButton(ActionEvent event) 
+    public void loadOlderPostsButton(ActionEvent event) 
     {
         String[] args = {"userLogin=" + user, "&passwordLogin=" + userPassword, "&older=" + oldestPost, "&amount=" + 10};
         servletConnection(args);
@@ -330,7 +365,7 @@ public class FXMLDocumentController
      * @param args Array of arguments.
      * @return True if successful, false otherwise.
      */
-    boolean servletConnection(String[] args)
+    public boolean servletConnection(String[] args)
     {
         boolean success = true;
         
@@ -376,7 +411,7 @@ public class FXMLDocumentController
      * @param event 
      */
     @FXML
-    void performLogout(ActionEvent event) 
+    public void performLogout(ActionEvent event) 
     {
         items.clear();
         user = null;
@@ -407,7 +442,7 @@ public class FXMLDocumentController
      * @param event The mouse event while pressing.
      */
     @FXML
-    void backgroundMousePressed(MouseEvent event) 
+    public void backgroundMousePressed(MouseEvent event) 
     {
         if(stage == null)
         {
@@ -422,7 +457,7 @@ public class FXMLDocumentController
      * This function handles the press a button. If this button is the escape button the application exits.
      */
     @FXML
-    void pressEscape(KeyEvent event) 
+    public void pressEscape(KeyEvent event) 
     {
         if(event.getCode()==KeyCode.ESCAPE)
         {
@@ -435,7 +470,7 @@ public class FXMLDocumentController
      * @param event 
      */
     @FXML
-    void pressExitButton(ActionEvent event) 
+    public void pressExitButton(ActionEvent event) 
     {
         performExit();
     }
@@ -443,7 +478,7 @@ public class FXMLDocumentController
     /**
      * This function perfoms the exit of the program.
      */
-    void performExit()
+    public void performExit()
     {
         FadeTransition exit = new FadeTransition(new Duration(1500));
         exit.setNode(background);
